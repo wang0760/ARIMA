@@ -12,9 +12,6 @@
 # * `scikit-learn == 0.24.2`
 # 
 
-pip install statsmodels
-pip install streamlit
-
 import os
 import warnings
 import matplotlib.pyplot as plt
@@ -22,6 +19,8 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import math
+import streamlit
+import statsmodels
 
 from pandas.plotting import autocorrelation_plot
 from statsmodels.tsa.statespace.sarimax import SARIMAX
