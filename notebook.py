@@ -13,6 +13,7 @@
 # 
 
 pip install statsmodels
+pip install streamlit
 
 import os
 import warnings
