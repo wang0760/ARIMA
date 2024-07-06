@@ -12,7 +12,7 @@
 # * `scikit-learn == 0.24.2`
 # 
 
-!pip install statsmodels
+pip install statsmodels
 
 import os
 import warnings
