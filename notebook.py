@@ -8,6 +8,7 @@ import math
 import statsmodels.api as sm
 from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+import streamlit as st
 
 # Configure settings
 pd.options.display.float_format = '{:,.2f}'.format
@@ -42,7 +43,7 @@ model = SARIMAX(endog=history, order=order, seasonal_order=seasonal_order)
 
 try:
     print(f"Fitting model")
-    model_fit = model.fit(maxiter=500)
+    model_fit = model.fit(maxiter=100)
 except Exception as e:
     print(f"Error fitting model at timestamp {test.index[t]}: {e}")
 
@@ -59,7 +60,23 @@ eval_df['actual'] = np.array(np.transpose(test)).ravel()
 def mape(y_true, y_pred):
     return np.mean(np.abs((y_pred - y_true) / y_true)) * 100
 
-print('MAPE: ', mape(eval_df['actual'], eval_df['prediction']), '%')
+mape_score = mape(eval_df['actual'], eval_df['prediction'])
+print('MAPE: ', mape_score, '%')
 
 eval_df.plot(x='timestamp', y=['actual', 'prediction'], style=['r', 'b'], figsize=(15, 8))
-plt.show()
+# plt.show()
+
+# Streamlit app
+st.title("Time Series Forecasting with SARIMAX")
+st.write(f"Mean Absolute Percentage Error (MAPE): {mape_score:.2f}%")
+
+# Plotting
+fig, ax = plt.subplots()
+ax.plot(test.index, eval_df["actual"], label='Actual')
+ax.plot(test.index, eval_df["prediction"], label='Forecast', linestyle='--')
+ax.set_xlabel('DateTime')
+ax.set_ylabel('Value')
+ax.set_title('Actual vs Forecast')
+ax.legend()
+plt.xticks(rotation=45)
+st.pyplot(fig)
