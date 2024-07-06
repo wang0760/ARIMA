@@ -340,12 +340,3 @@ Check the accuracy of your model by testing its mean absolute percentage error (
     ![a time series model](images/accuracy.png)
 
 🏆 A very nice plot, showing a model with good accuracy. Well done!
-
----
-
-
-This lesson touches on only the basics of Time Series Forecasting with ARIMA. Take some time to deepen your knowledge by digging into [this repository](https://microsoft.github.io/forecasting/) and its various model types to learn other ways to build Time Series models.
-
-## Assignment
-
-[A new ARIMA model](assignment.md)
