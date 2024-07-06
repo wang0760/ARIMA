@@ -64,8 +64,25 @@ print('Forecasting horizon:', HORIZON, 'hours')
 order = (2, 1, 0)
 seasonal_order = (1, 1, 1, 24)
 
-model = SARIMAX(endog=train, order=order, seasonal_order=seasonal_order)
-results = model.fit()
+# Iterate over test data for forecasting
+for t in range(test_ts.shape[0]):
+    model = SARIMAX(endog=history, order=order, seasonal_order=seasonal_order)
+    
+    try:
+        model_fit = model.fit()
+    except Exception as e:
+        print(f"Error fitting model at timestamp {test_ts.index[t]}: {e}")
+        continue
+    
+    yhat = model_fit.forecast(steps=HORIZON)
+    predictions.append(yhat)
+    
+    obs = list(test_ts.iloc[t])
+    history.append(obs[0])
+    history.pop(0)
+    
+    print(test_ts.index[t])
+    print(t + 1, ': predicted =', yhat, 'expected =', obs)
 
 print(results.summary())
 
