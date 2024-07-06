@@ -1,13 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 # # Time series forecasting with ARIMA
-# 
-# In this notebook, we demonstrate how to:
-# - prepare time series data for training an ARIMA time series forecasting model
-# - implement a simple ARIMA model to forecast the next HORIZON steps ahead (time *t+1* through *t+HORIZON*) in the time series
-# - evaluate the model 
-# 
 # 
 # The data in this example is taken from the GEFCom2014 forecasting competition<sup>1</sup>. It consists of 3 years of hourly electricity load and temperature values between 2012 and 2014. The task is to forecast future values of electricity load. In this example, we show how to forecast one time step ahead, using historical load data only.
 # 
@@ -21,14 +12,7 @@
 # * `scikit-learn == 0.24.2`
 # 
 
-# In[16]:
-
-
-get_ipython().system('pip install statsmodels')
-
-
-# In[17]:
-
+!pip install statsmodels
 
 import os
 import warnings
@@ -49,18 +33,10 @@ pd.options.display.float_format = '{:,.2f}'.format
 np.set_printoptions(precision=2)
 warnings.filterwarnings("ignore") # specify to ignore warning messages
 
-
-# In[18]:
-
-
-energy = load_data('./data')[['load']]
+energy = load_data('./ARIMA/energy.csv')[['load']]
 energy.head(10)
 
-
 # Plot all available load data (January 2012 to Dec 2014)
-
-# In[19]:
-
 
 energy.plot(y='load', subplots=True, figsize=(15, 8), fontsize=12)
 plt.xlabel('timestamp', fontsize=12)
@@ -69,17 +45,9 @@ plt.show()
 
 
 # ## Create training and testing data sets
-# 
-
-# In[20]:
-
 
 train_start_dt = '2014-11-01 00:00:00'
 test_start_dt = '2014-12-30 00:00:00'    
-
-
-# In[21]:
-
 
 energy[(energy.index < test_start_dt) & (energy.index >= train_start_dt)][['load']].rename(columns={'load':'train'}) \
     .join(energy[test_start_dt:][['load']].rename(columns={'load':'test'}), how='outer') \
@@ -88,19 +56,11 @@ plt.xlabel('timestamp', fontsize=12)
 plt.ylabel('load', fontsize=12)
 plt.show()
 
-
-# In[22]:
-
-
 train = energy.copy()[(energy.index >= train_start_dt) & (energy.index < test_start_dt)][['load']]
 test = energy.copy()[energy.index >= test_start_dt][['load']]
 
 print('Training data shape: ', train.shape)
 print('Test data shape: ', test.shape)
-
-
-# In[23]:
-
 
 scaler = MinMaxScaler()
 train['load'] = scaler.fit_transform(train)
@@ -109,17 +69,12 @@ train.head(10)
 
 # Original vs scaled data:
 
-# In[24]:
-
-
 energy[(energy.index >= train_start_dt) & (energy.index < test_start_dt)][['load']].rename(columns={'load':'original load'}).plot.hist(bins=100, fontsize=12)
 train.rename(columns={'load':'scaled load'}).plot.hist(bins=100, fontsize=12)
 plt.show()
 
 
 # Let's also scale the test data
-
-# In[25]:
 
 
 test['load'] = scaler.transform(test)
@@ -128,15 +83,9 @@ test.head()
 
 # ## Implement ARIMA method
 
-# In[26]:
-
-
 # Specify the number of steps to forecast ahead
 HORIZON = 3
 print('Forecasting horizon:', HORIZON, 'hours')
-
-
-# In[27]:
 
 
 order = (4, 1, 0)
@@ -152,8 +101,6 @@ print(results.summary())
 
 # Create a test data point for each HORIZON step.
 
-# In[28]:
-
 
 test_shifted = test.copy()
 
@@ -166,16 +113,9 @@ test_shifted.head(5)
 
 # Make predictions on the test data
 
-# In[29]:
-
-
 get_ipython().run_cell_magic('time', '', "training_window = 720 # dedicate 30 days (720 hours) for training\n\ntrain_ts = train['load']\ntest_ts = test_shifted\n\nhistory = [x for x in train_ts]\nhistory = history[(-training_window):]\n\npredictions = list()\n\n# let's user simpler model for demonstration\norder = (2, 1, 0)\nseasonal_order = (1, 1, 0, 24)\n\nfor t in range(test_ts.shape[0]):\n    model = SARIMAX(endog=history, order=order, seasonal_order=seasonal_order)\n    model_fit = model.fit()\n    yhat = model_fit.forecast(steps = HORIZON)\n    predictions.append(yhat)\n    obs = list(test_ts.iloc[t])\n    # move the training window\n    history.append(obs[0])\n    history.pop(0)\n    print(test_ts.index[t])\n    print(t+1, ': predicted =', yhat, 'expected =', obs)\n")
 
-
 # Compare predictions to actual load
-
-# In[30]:
-
 
 eval_df = pd.DataFrame(predictions, columns=['t+'+str(t) for t in range(1, HORIZON+1)])
 eval_df['timestamp'] = test.index[0:len(test.index)-HORIZON+1]
@@ -184,36 +124,18 @@ eval_df['actual'] = np.array(np.transpose(test_ts)).ravel()
 eval_df[['prediction', 'actual']] = scaler.inverse_transform(eval_df[['prediction', 'actual']])
 eval_df.head()
 
-
-# Compute the **mean absolute percentage error (MAPE)** over all predictions
-# 
-# $$MAPE = \frac{1}{n} \sum_{t=1}^{n}|\frac{actual_t - predicted_t}{actual_t}|$$
-
-# In[31]:
-
-
 if(HORIZON > 1):
     eval_df['APE'] = (eval_df['prediction'] - eval_df['actual']).abs() / eval_df['actual']
     print(eval_df.groupby('h')['APE'].mean())
 
 
-# 
-
-# In[32]:
-
-
 print('One step forecast MAPE: ', (mape(eval_df[eval_df['h'] == 't+1']['prediction'], eval_df[eval_df['h'] == 't+1']['actual']))*100, '%')
-
-
-# In[33]:
 
 
 print('Multi-step forecast MAPE: ', mape(eval_df['prediction'], eval_df['actual'])*100, '%')
 
 
 # Plot the predictions vs the actuals for the first week of the test set
-
-# In[34]:
 
 
 if(HORIZON == 1):
@@ -239,9 +161,6 @@ else:
 plt.xlabel('timestamp', fontsize=12)
 plt.ylabel('load', fontsize=12)
 plt.show()
-
-
-# In[ ]:
 
 
 
