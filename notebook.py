@@ -18,7 +18,7 @@ np.set_printoptions(precision=2)
 warnings.filterwarnings("ignore")
 
 # Load data
-energy = load_data('https://github.com/wang0760/ARIMA/blob/main/energy.csv')[['load']]
+energy = load_data('./energy.csv')[['load']]
 energy.head(10)
 
 # Plot all available load data (January 2012 to Dec 2014)
