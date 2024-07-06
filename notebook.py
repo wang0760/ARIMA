@@ -18,7 +18,7 @@ np.set_printoptions(precision=2)
 warnings.filterwarnings("ignore")
 
 # Read data
-energy = pd.read_csv("./energy.csv")
+energy = pd.read_csv("./energy.csv", parse_dates=['timestamp'], index_col='timestamp')
 energy.head(10)
 
 # Plot all available load data (January 2012 to Dec 2014)
