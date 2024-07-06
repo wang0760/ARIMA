@@ -61,8 +61,8 @@ test.head()
 HORIZON = 3
 print('Forecasting horizon:', HORIZON, 'hours')
 
-order = (4, 1, 0)
-seasonal_order = (1, 1, 0, 24)
+order = (2, 1, 0)
+seasonal_order = (1, 1, 1, 24)
 
 model = SARIMAX(endog=train, order=order, seasonal_order=seasonal_order)
 results = model.fit()
