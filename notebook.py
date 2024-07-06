@@ -17,8 +17,8 @@ pd.options.display.float_format = '{:,.2f}'.format
 np.set_printoptions(precision=2)
 warnings.filterwarnings("ignore")
 
-# Load data
-energy = load_data('./energy.csv')[['load']]
+# Read data
+energy = pd.read_csv("./energy.csv")
 energy.head(10)
 
 # Plot all available load data (January 2012 to Dec 2014)
