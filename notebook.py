@@ -11,7 +11,6 @@ import statsmodels.api as sm
 from pandas.plotting import autocorrelation_plot
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn.preprocessing import MinMaxScaler
-from common.utils import load_data, mape  # Ensure this is available and accessible
 
 # Configure settings
 pd.options.display.float_format = '{:,.2f}'.format
