@@ -42,7 +42,7 @@ model = SARIMAX(endog=history, order=order, seasonal_order=seasonal_order)
 
 try:
     print(f"Fitting model")
-    model_fit = model.fit()
+    model_fit = model.fit(maxiter=500)
 except Exception as e:
     print(f"Error fitting model at timestamp {test.index[t]}: {e}")
 
